@@ -17,6 +17,8 @@ namespace API.Controllers
     {
         readonly IAmazonSQS _sqsClient;
 
+        readonly string _stopNotificationQueue;
+
         readonly BusLocationDataContext _context;
 
         /// <summary>
@@ -27,6 +29,7 @@ namespace API.Controllers
         {
             _context = context;
             _sqsClient = sqsClient;
+            _stopNotificationQueue = Startup.Configuration.GetSection("StopNotificationQueue").Value;
         }
 
         // GET api/buslocation
@@ -53,12 +56,12 @@ namespace API.Controllers
             // SQS
             await _sqsClient.SendMessageAsync(new SendMessageRequest()
             {
-                MessageBody = JsonConvert.SerializeObject(value),
+                MessageBody = JsonConvert.SerializeObject(value, Startup.JsonSerializerSettings),
                 MessageAttributes = new Dictionary<string, MessageAttributeValue>()
                 {
                     { "Action", new MessageAttributeValue() { DataType = "String", StringValue = "ADD" } }
                 },
-                QueueUrl = Startup.QUEUE_URL
+                QueueUrl = _stopNotificationQueue
             });
 
             return Ok(value.BusLocationID);
@@ -84,12 +87,12 @@ namespace API.Controllers
             // SQS
             await _sqsClient.SendMessageAsync(new SendMessageRequest()
             {
-                MessageBody = JsonConvert.SerializeObject(value),
+                MessageBody = JsonConvert.SerializeObject(value, Startup.JsonSerializerSettings),
                 MessageAttributes = new Dictionary<string, MessageAttributeValue>()
                 {
                     { "Action", new MessageAttributeValue() { DataType = "String", StringValue = "UPDATE" } }
                 },
-                QueueUrl = Startup.QUEUE_URL
+                QueueUrl = _stopNotificationQueue
             });
 
             return NoContent();

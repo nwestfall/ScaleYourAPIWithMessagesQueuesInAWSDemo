@@ -18,14 +18,17 @@ namespace API
 {
     public class Startup
     {
-        public const string QUEUE_URL = "https://sqs.us-east-1.amazonaws.com/034828384224/BusLocationQueue";
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
         public static IConfiguration Configuration { get; private set; }
+
+        public static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings()
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        };
 
         // This method gets called by the runtime. Use this method to add services to the container
         public void ConfigureServices(IServiceCollection services)
